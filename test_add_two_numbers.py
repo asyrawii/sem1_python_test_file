@@ -1,37 +1,40 @@
 import ast
 import subprocess
 import sys
-import pytest
 
-def test_sum_two_numbers():
+def test_variable_x():
+    with open("exercise_2.py") as f:
+        tree = ast.parse(f.read())
 
-    with open("exercise_2.py", encoding="utf-8-sig") as f:
-        source = f.read()
-
-    try:
-        tree = ast.parse(source)
-    except SyntaxError:
-        pytest.fail("Syntax error in your program.", pytrace=False)
-
-    # Check variable declarations
-    variables = {}
-
-    for node in tree.body:
-        if isinstance(node, ast.Assign):
-            for target in node.targets:
-                if isinstance(target, ast.Name):
-                    if isinstance(node.value, ast.Constant):
-                        variables[target.id] = node.value.value
-
-    assert variables.get("x") == 5, (
-        "Variable x must be declared with value 5."
+    assert any(
+        isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "x"
+            for target in node.targets
+        )
+        and isinstance(node.value, ast.Constant)
+        and type(node.value.value) is int
+        and node.value.value == 5
+        for node in tree.body
     )
 
-    assert variables.get("y") == 13, (
-        "Variable y must be declared with value 13."
+def test_variable_y():
+    with open("exercise_2.py") as f:
+        tree = ast.parse(f.read())
+
+    assert any(
+        isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "y"
+            for target in node.targets
+        )
+        and isinstance(node.value, ast.Constant)
+        and type(node.value.value) is int
+        and node.value.value == 13
+        for node in tree.body
     )
 
-    # Run student's program
+def test_output():
     result = subprocess.run(
         [sys.executable, "exercise_2.py"],
         capture_output=True,
@@ -39,8 +42,5 @@ def test_sum_two_numbers():
         timeout=5
     )
 
-    assert result.returncode == 0, "Program failed to run."
-
-    assert result.stdout.strip() == "18", (
-        "Incorrect output! Expected: 18"
-    )
+    assert result.returncode == 0
+    assert result.stdout.strip() == "18"
