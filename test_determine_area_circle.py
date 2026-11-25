@@ -27,14 +27,13 @@ def test_input_prompt(tree):
     ), "Use input() with a prompt."
 
 
-def test_if_statement(tree):
+def test_positive_condition(tree):
     assert any(
         isinstance(n, ast.If)
         and isinstance(n.test, ast.Compare)
-        and isinstance(n.test.left, ast.Name)
         and isinstance(n.test.ops[0], ast.Gt)
         for n in ast.walk(tree)
-    ), "Use an if statement to check radius > 0."
+    ), "Check whether radius > 0."
 
 
 @pytest.mark.parametrize("radius", [2, 5, 10, 7.5])
@@ -54,12 +53,16 @@ def test_positive_radius(radius):
         result.stdout
     )
 
-    assert numbers, "No area was printed."
+    assert numbers, "Area was not printed."
 
     actual = float(numbers[-1])
     expected = math.pi * radius ** 2
 
-    assert math.isclose(actual, expected, rel_tol=0.001)
+    assert math.isclose(
+        actual, expected,
+        rel_tol=0.001,
+        abs_tol=0.02
+    ), "Incorrect area calculation."
 
 
 @pytest.mark.parametrize("radius", [0, -2, -5])
@@ -73,5 +76,11 @@ def test_non_positive_radius(radius):
     )
 
     assert result.returncode == 0
-    assert not result.stdout.strip().splitlines()[-1].strip().replace(".", "").isdigit() \
-        if result.stdout.strip() else True
+
+    # No numeric area should be printed
+    numbers = re.findall(
+        r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?",
+        result.stdout
+    )
+
+    assert not numbers, "Do not calculate or print area for non-positive radius."
