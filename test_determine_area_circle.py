@@ -5,7 +5,7 @@ import math
 import re
 import pytest
 
-FILE = "exercise_5.py"
+FILE = "exercise_1.py"
 
 
 @pytest.fixture(scope="module")
