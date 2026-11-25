@@ -3,7 +3,7 @@ import subprocess
 import sys
 import pytest
 
-FILE = "exercise_6.py"
+FILE = "exercise_2.py"
 
 @pytest.fixture
 def tree():
